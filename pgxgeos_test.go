@@ -17,20 +17,22 @@ var defaultConnTestRunner pgxtest.ConnTestRunner
 
 func init() {
 	defaultConnTestRunner = pgxtest.DefaultConnTestRunner()
-	defaultConnTestRunner.AfterConnect = func(ctx context.Context, t testing.TB, conn *pgx.Conn) {
+	defaultConnTestRunner.AfterConnect = func(ctx context.Context, tb testing.TB, conn *pgx.Conn) {
+		tb.Helper()
 		_, err := conn.Exec(ctx, "create extension if not exists postgis")
-		assert.NoError(t, err)
-		assert.NoError(t, pgxgeos.Register(ctx, conn, geos.NewContext()))
+		assert.NoError(tb, err)
+		assert.NoError(tb, pgxgeos.Register(ctx, conn, geos.NewContext()))
 	}
 }
 
 func TestCodecDecodeValue(t *testing.T) {
-	defaultConnTestRunner.RunTest(context.Background(), t, func(ctx context.Context, t testing.TB, conn *pgx.Conn) {
+	defaultConnTestRunner.RunTest(context.Background(), t, func(ctx context.Context, tb testing.TB, conn *pgx.Conn) {
+		tb.Helper()
 		for _, format := range []int16{
 			pgx.BinaryFormatCode,
 			pgx.TextFormatCode,
 		} {
-			t.(*testing.T).Run(strconv.Itoa(int(format)), func(t *testing.T) {
+			tb.(*testing.T).Run(strconv.Itoa(int(format)), func(t *testing.T) {
 				original := mustNewGeomFromWKT(t, "POINT(1 2)").SetSRID(4326)
 				rows, err := conn.Query(ctx, "select $1::geometry", pgx.QueryResultFormats{format}, original)
 				assert.NoError(t, err)
@@ -52,27 +54,29 @@ func TestCodecDecodeValue(t *testing.T) {
 }
 
 func TestCodecDecodeNullValue(t *testing.T) {
-	defaultConnTestRunner.RunTest(context.Background(), t, func(ctx context.Context, t testing.TB, conn *pgx.Conn) {
+	defaultConnTestRunner.RunTest(context.Background(), t, func(ctx context.Context, tb testing.TB, conn *pgx.Conn) {
+		tb.Helper()
 		rows, err := conn.Query(ctx, "select $1::geometry", nil)
-		assert.NoError(t, err)
+		assert.NoError(tb, err)
 
 		for rows.Next() {
 			values, err := rows.Values()
-			assert.NoError(t, err)
-			assert.Equal(t, []any{nil}, values)
+			assert.NoError(tb, err)
+			assert.Equal(tb, []any{nil}, values)
 		}
 
-		assert.NoError(t, rows.Err())
+		assert.NoError(tb, rows.Err())
 	})
 }
 
 func TestCodecScanValue(t *testing.T) {
-	defaultConnTestRunner.RunTest(context.Background(), t, func(ctx context.Context, t testing.TB, conn *pgx.Conn) {
+	defaultConnTestRunner.RunTest(context.Background(), t, func(ctx context.Context, tb testing.TB, conn *pgx.Conn) {
+		tb.Helper()
 		for _, format := range []int16{
 			pgx.BinaryFormatCode,
 			pgx.TextFormatCode,
 		} {
-			t.(*testing.T).Run(strconv.Itoa(int(format)), func(t *testing.T) {
+			tb.(*testing.T).Run(strconv.Itoa(int(format)), func(t *testing.T) {
 				var geom *geos.Geom
 				err := conn.QueryRow(ctx, "select ST_SetSRID('POINT(1 2)'::geometry, 4326)", pgx.QueryResultFormats{format}).Scan(&geom)
 				assert.NoError(t, err)
@@ -82,9 +86,9 @@ func TestCodecScanValue(t *testing.T) {
 	})
 }
 
-func mustNewGeomFromWKT(t testing.TB, wkt string) *geos.Geom {
-	t.Helper()
+func mustNewGeomFromWKT(tb testing.TB, wkt string) *geos.Geom {
+	tb.Helper()
 	geom, err := geos.NewGeomFromWKT(wkt)
-	assert.NoError(t, err)
+	assert.NoError(tb, err)
 	return geom
 }

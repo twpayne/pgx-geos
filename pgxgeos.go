@@ -4,14 +4,11 @@ import (
 	"context"
 	"database/sql/driver"
 	"encoding/hex"
-	"errors"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/twpayne/go-geos"
 )
-
-var errUnsupported = errors.ErrUnsupported
 
 // A codec implements [github.com/jackc/pgx/v5/pgtype.Codec] for
 // [*github.com/twpayne/go-geos.Geom] types.
