@@ -2,6 +2,7 @@ package pgxgeos_test
 
 import (
 	"context"
+	"strconv"
 	"testing"
 
 	"github.com/alecthomas/assert/v2"
@@ -19,29 +20,34 @@ func init() {
 	defaultConnTestRunner.AfterConnect = func(ctx context.Context, t testing.TB, conn *pgx.Conn) {
 		_, err := conn.Exec(ctx, "create extension if not exists postgis")
 		assert.NoError(t, err)
-		pgxgeos.Register(ctx, conn, geos.NewContext())
+		assert.NoError(t, pgxgeos.Register(ctx, conn, geos.NewContext()))
 	}
 }
 
 func TestCodecDecodeValue(t *testing.T) {
 	defaultConnTestRunner.RunTest(context.Background(), t, func(ctx context.Context, t testing.TB, conn *pgx.Conn) {
-		original, err := geos.NewGeomFromWKT("POINT(1 2)")
-		assert.NoError(t, err)
+		for _, format := range []int16{
+			pgx.BinaryFormatCode,
+			pgx.TextFormatCode,
+		} {
+			t.(*testing.T).Run(strconv.Itoa(int(format)), func(t *testing.T) {
+				original := mustNewGeomFromWKT(t, "POINT(1 2)").SetSRID(4326)
+				rows, err := conn.Query(ctx, "select $1::geometry", pgx.QueryResultFormats{format}, original)
+				assert.NoError(t, err)
 
-		rows, err := conn.Query(ctx, "select $1::geometry", original)
-		assert.NoError(t, err)
+				for rows.Next() {
+					values, err := rows.Values()
+					assert.NoError(t, err)
 
-		for rows.Next() {
-			values, err := rows.Values()
-			assert.NoError(t, err)
+					assert.Equal(t, 1, len(values))
+					v0, ok := values[0].(*geos.Geom)
+					assert.True(t, ok)
+					assert.True(t, original.Equals(v0))
+				}
 
-			assert.Equal(t, 1, len(values))
-			v0, ok := values[0].(*geos.Geom)
-			assert.True(t, ok)
-			assert.True(t, original.Equals(v0))
+				assert.NoError(t, rows.Err())
+			})
 		}
-
-		assert.NoError(t, rows.Err())
 	})
 }
 
@@ -62,10 +68,17 @@ func TestCodecDecodeNullValue(t *testing.T) {
 
 func TestCodecScanValue(t *testing.T) {
 	defaultConnTestRunner.RunTest(context.Background(), t, func(ctx context.Context, t testing.TB, conn *pgx.Conn) {
-		var geom *geos.Geom
-		err := conn.QueryRow(ctx, "select 'POINT(1 2)'::geometry").Scan(&geom)
-		assert.NoError(t, err)
-		assert.Equal(t, mustNewGeomFromWKT(t, "POINT(1 2)").ToEWKBWithSRID(), geom.ToEWKBWithSRID())
+		for _, format := range []int16{
+			pgx.BinaryFormatCode,
+			pgx.TextFormatCode,
+		} {
+			t.(*testing.T).Run(strconv.Itoa(int(format)), func(t *testing.T) {
+				var geom *geos.Geom
+				err := conn.QueryRow(ctx, "select ST_SetSRID('POINT(1 2)'::geometry, 4326)", pgx.QueryResultFormats{format}).Scan(&geom)
+				assert.NoError(t, err)
+				assert.Equal(t, mustNewGeomFromWKT(t, "POINT(1 2)").SetSRID(4326).ToEWKBWithSRID(), geom.ToEWKBWithSRID())
+			})
+		}
 	})
 }
 

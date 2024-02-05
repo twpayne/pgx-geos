@@ -3,6 +3,7 @@ package pgxgeos
 import (
 	"context"
 	"database/sql/driver"
+	"encoding/hex"
 	"errors"
 
 	"github.com/jackc/pgx/v5"
@@ -22,14 +23,33 @@ type codec struct {
 // [*github.com/twpayne/go-geos.Geom] types in binary format.
 type binaryEncodePlan struct{}
 
-type scanPlan struct {
+// A textEncodePlan implements [github.com/jackc/pgx/v5/pgtype.EncodePlan] for
+// [*github.com/twpayne/go-geos.Geom] types in text format.
+type textEncodePlan struct{}
+
+// A binaryScanPlan implements [github.com/jackc/pgx/v5/pgtype.ScanPlan] for
+// [*github.com/twpayne/go-geos.Geom] types in binary format.
+type binaryScanPlan struct {
+	geosContext *geos.Context
+}
+
+// A textScanPlan implements [github.com/jackc/pgx/v5/pgtype.ScanPlan] for
+// [*github.com/twpayne/go-geos.Geom] types in text format.
+type textScanPlan struct {
 	geosContext *geos.Context
 }
 
 // FormatSupported implements
 // [github.com/jackc/pgx/v5/pgtype.Codec.FormatSupported].
 func (c *codec) FormatSupported(format int16) bool {
-	return format == pgtype.BinaryFormatCode
+	switch format {
+	case pgtype.BinaryFormatCode:
+		return true
+	case pgtype.TextFormatCode:
+		return true
+	default:
+		return false
+	}
 }
 
 // PreferredFormat implements
@@ -46,6 +66,8 @@ func (c *codec) PlanEncode(m *pgtype.Map, old uint32, format int16, value any) p
 	switch format {
 	case pgtype.BinaryFormatCode:
 		return binaryEncodePlan{}
+	case pgtype.TextFormatCode:
+		return textEncodePlan{}
 	default:
 		return nil
 	}
@@ -56,8 +78,17 @@ func (c *codec) PlanScan(m *pgtype.Map, old uint32, format int16, target any) pg
 	if _, ok := target.(**geos.Geom); !ok {
 		return nil
 	}
-	return &scanPlan{
-		geosContext: c.geosContext,
+	switch format {
+	case pgx.BinaryFormatCode:
+		return &binaryScanPlan{
+			geosContext: c.geosContext,
+		}
+	case pgx.TextFormatCode:
+		return &textScanPlan{
+			geosContext: c.geosContext,
+		}
+	default:
+		return nil
 	}
 }
 
@@ -70,6 +101,13 @@ func (c *codec) DecodeDatabaseSQLValue(m *pgtype.Map, oid uint32, format int16, 
 // DecodeValue implements [github.com/jackc/pgx/v5/pgtype.Codec.DecodeValue].
 func (c *codec) DecodeValue(m *pgtype.Map, oid uint32, format int16, src []byte) (any, error) {
 	switch format {
+	case pgtype.TextFormatCode:
+		var err error
+		src, err = hex.DecodeString(string(src))
+		if err != nil {
+			return nil, err
+		}
+		fallthrough
 	case pgtype.BinaryFormatCode:
 		geom, err := c.geosContext.NewGeomFromWKB(src)
 		return geom, err
@@ -87,8 +125,18 @@ func (p binaryEncodePlan) Encode(value any, buf []byte) (newBuf []byte, err erro
 	return append(buf, geom.ToEWKBWithSRID()...), nil
 }
 
+// Encode implements [github.com/jackc/pgx/v5/pgtype.EncodePlan.Encode].
+func (p textEncodePlan) Encode(value any, buf []byte) (newBuf []byte, err error) {
+	geom, ok := value.(*geos.Geom)
+	if !ok {
+		return buf, errUnsupported
+	}
+	wkb := geom.ToEWKBWithSRID()
+	return append(buf, []byte(hex.EncodeToString(wkb))...), nil
+}
+
 // Scan implements [github.com/jackc/pgx/v5/pgtype.ScanPlan.Scan].
-func (p *scanPlan) Scan(src []byte, target any) error {
+func (p *binaryScanPlan) Scan(src []byte, target any) error {
 	pgeom, ok := target.(**geos.Geom)
 	if !ok {
 		return errUnsupported
@@ -97,6 +145,27 @@ func (p *scanPlan) Scan(src []byte, target any) error {
 	if err != nil {
 		return err
 	}
+	(*pgeom).Destroy()
+	*pgeom = geom
+	return nil
+}
+
+// Scan implements [github.com/jackc/pgx/v5/pgtype.ScanPlan.Scan].
+func (p *textScanPlan) Scan(src []byte, target any) error {
+	pgeom, ok := target.(**geos.Geom)
+	if !ok {
+		return errUnsupported
+	}
+	var err error
+	src, err = hex.DecodeString(string(src))
+	if err != nil {
+		return err
+	}
+	geom, err := p.geosContext.NewGeomFromWKB(src)
+	if err != nil {
+		return err
+	}
+	(*pgeom).Destroy()
 	*pgeom = geom
 	return nil
 }
