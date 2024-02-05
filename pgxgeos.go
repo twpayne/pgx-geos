@@ -173,8 +173,6 @@ func (p *textScanPlan) Scan(src []byte, target any) error {
 // Register registers a codec for [*github.com/twpayne/go-geos.Geom] types on
 // conn.
 func Register(ctx context.Context, conn *pgx.Conn, geosContext *geos.Context) error {
-	// Find the OID for the geometry type. We cannot use conn.LoadType because
-	// it assumes that arrays of the type are supported.
 	var oid uint32
 	err := conn.QueryRow(ctx, "select 'geometry'::text::regtype::oid").Scan(&oid)
 	if err != nil {
