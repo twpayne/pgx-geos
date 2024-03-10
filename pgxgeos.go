@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql/driver"
 	"encoding/hex"
+	"errors"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -92,7 +93,7 @@ func (c *codec) PlanScan(m *pgtype.Map, old uint32, format int16, target any) pg
 // DecodeDatabaseSQLValue implements
 // [github.com/jackc/pgx/v5/pgtype.Codec.DecodeDatabaseSQLValue].
 func (c *codec) DecodeDatabaseSQLValue(m *pgtype.Map, oid uint32, format int16, src []byte) (driver.Value, error) {
-	return nil, errUnsupported
+	return nil, errors.ErrUnsupported
 }
 
 // DecodeValue implements [github.com/jackc/pgx/v5/pgtype.Codec.DecodeValue].
@@ -109,7 +110,7 @@ func (c *codec) DecodeValue(m *pgtype.Map, oid uint32, format int16, src []byte)
 		geom, err := c.geosContext.NewGeomFromWKB(src)
 		return geom, err
 	default:
-		return nil, errUnsupported
+		return nil, errors.ErrUnsupported
 	}
 }
 
@@ -117,7 +118,7 @@ func (c *codec) DecodeValue(m *pgtype.Map, oid uint32, format int16, src []byte)
 func (p binaryEncodePlan) Encode(value any, buf []byte) (newBuf []byte, err error) {
 	geom, ok := value.(*geos.Geom)
 	if !ok {
-		return buf, errUnsupported
+		return buf, errors.ErrUnsupported
 	}
 	return append(buf, geom.ToEWKBWithSRID()...), nil
 }
@@ -126,7 +127,7 @@ func (p binaryEncodePlan) Encode(value any, buf []byte) (newBuf []byte, err erro
 func (p textEncodePlan) Encode(value any, buf []byte) (newBuf []byte, err error) {
 	geom, ok := value.(*geos.Geom)
 	if !ok {
-		return buf, errUnsupported
+		return buf, errors.ErrUnsupported
 	}
 	wkb := geom.ToEWKBWithSRID()
 	return append(buf, []byte(hex.EncodeToString(wkb))...), nil
@@ -136,7 +137,7 @@ func (p textEncodePlan) Encode(value any, buf []byte) (newBuf []byte, err error)
 func (p *binaryScanPlan) Scan(src []byte, target any) error {
 	pgeom, ok := target.(**geos.Geom)
 	if !ok {
-		return errUnsupported
+		return errors.ErrUnsupported
 	}
 	geom, err := p.geosContext.NewGeomFromWKB(src)
 	if err != nil {
@@ -151,7 +152,7 @@ func (p *binaryScanPlan) Scan(src []byte, target any) error {
 func (p *textScanPlan) Scan(src []byte, target any) error {
 	pgeom, ok := target.(**geos.Geom)
 	if !ok {
-		return errUnsupported
+		return errors.ErrUnsupported
 	}
 	var err error
 	src, err = hex.DecodeString(string(src))
