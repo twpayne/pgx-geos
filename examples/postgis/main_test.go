@@ -6,16 +6,18 @@ import (
 	"os/exec"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/alecthomas/assert/v2"
 	"github.com/jackc/pgx/v5"
-	"github.com/ory/dockertest/v3"
+	"github.com/testcontainers/testcontainers-go"
+	"github.com/testcontainers/testcontainers-go/modules/postgres"
+	"github.com/testcontainers/testcontainers-go/wait"
 	"github.com/twpayne/go-geos"
-
 	pgxgeos "github.com/twpayne/pgx-geos"
 )
 
-func TestMain(t *testing.T) {
+func TestIntegration(t *testing.T) {
 	ctx := context.Background()
 
 	if _, err := exec.LookPath("docker"); err != nil {
@@ -28,41 +30,31 @@ func TestMain(t *testing.T) {
 		password = "pgxgeospassword"
 	)
 
-	pool, err := dockertest.NewPool("")
-	assert.NoError(t, err)
+	pgContainer, err := postgres.RunContainer(ctx,
+		testcontainers.WithImage("docker.io/postgis/postgis:12-3.0"),
+		postgres.WithDatabase(database),
+		postgres.WithUsername(user),
+		postgres.WithPassword(password),
+		testcontainers.WithWaitStrategy(
+			wait.ForLog("database system is ready to accept connections").
+				WithOccurrence(2).
+				WithStartupTimeout(5*time.Second),
+		),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	resource, err := pool.Run("postgis/postgis", "16-3.4-alpine", []string{
-		"POSTGRES_DB=" + database,
-		"POSTGRES_PASSWORD=" + password,
-		"POSTGRES_USER=" + user,
+	t.Cleanup(func() {
+		assert.NoError(t, pgContainer.Terminate(ctx))
 	})
-	assert.NoError(t, err)
-	defer func() {
-		assert.NoError(t, pool.Purge(resource))
-	}()
 
-	var conn *pgx.Conn
-	assert.NoError(t, pool.Retry(func() error {
-		config, err := pgx.ParseConfig(strings.Join([]string{
-			"database=" + database,
-			"host=localhost",
-			"password=" + password,
-			"port=" + resource.GetPort("5432/tcp"),
-			"user=" + user,
-		}, " "))
-		assert.NoError(t, err)
-		conn, err = pgx.ConnectConfig(ctx, config)
-		if err != nil {
-			return err
-		}
-		if err := conn.Ping(ctx); err != nil {
-			return err
-		}
-		if err := pgxgeos.Register(ctx, conn, geos.NewContext()); err != nil {
-			return err
-		}
-		return nil
-	}))
+	connStr, err := pgContainer.ConnectionString(ctx, "sslmode=disable")
+	assert.NoError(t, err)
+
+	conn, err := pgx.Connect(ctx, connStr)
+	assert.NoError(t, err)
+	assert.NoError(t, pgxgeos.Register(ctx, conn, geos.NewContext()))
 
 	assert.NoError(t, createDB(ctx, conn))
 
