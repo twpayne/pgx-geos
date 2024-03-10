@@ -23,6 +23,7 @@ linters:
   - gci
   - ginkgolinter
   - gocheckcompilerdirectives
+  - gochecksumtype
   - gocognit
   - goconst
   - gocritic
@@ -38,14 +39,17 @@ linters:
   - goprintffuncname
   - gosec
   - gosimple
+  - gosmopolitan
   - govet
   - grouper
   - importas
+  - inamedparam
   - ineffassign
   - interfacebloat
   - ireturn
   - loggercheck
   - makezero
+  - mirror
   - misspell
   - musttag
   - nakedret
@@ -55,17 +59,23 @@ linters:
   - noctx
   - nolintlint
   - nosprintfhostport
+  - perfsprint
   - prealloc
   - predeclared
   - promlinter
+  - protogetter
   - reassign
   - revive
   - rowserrcheck
+  - sloglint
+  - spancheck
   - sqlclosecheck
   - staticcheck
   - stylecheck
+  - tagalign
   - tagliatelle
   - tenv
+  - testifylint
   - testpackage
   - thelper
   - tparallel
@@ -76,6 +86,7 @@ linters:
   - usestdlibvars
   - wastedassign
   - whitespace
+  - zerologlint
   disable:
   - cyclop
   - depguard
@@ -91,7 +102,6 @@ linters:
   - nlreturn
   - nonamedreturns
   - paralleltest
-  - structcheck # https://github.com/golangci/golangci-lint/issues/2649
   - testableexamples
   - varnamelen
   - wrapcheck
@@ -115,6 +125,7 @@ linters-settings:
     enable-all: true
   ireturn:
     allow:
+    - empty
     - error
     - github.com/jackc/pgx/v5/pgtype.EncodePlan
     - github.com/jackc/pgx/v5/pgtype.ScanPlan
