@@ -113,7 +113,7 @@ func readGeoJSON(ctx context.Context, conn *pgx.Conn, r io.Reader) error {
 	}
 	_, err := conn.Exec(ctx, `
 		insert into waypoints(name, geom) values ($1, $2);
-	`, waypoint.Name, waypoint.Geometry.SetSRID(4326))
+	`, waypoint.Name, waypoint.Geometry)
 	return err
 }
 

@@ -31,7 +31,7 @@ func TestIntegration(t *testing.T) {
 	)
 
 	pgContainer, err := postgres.RunContainer(ctx,
-		testcontainers.WithImage("docker.io/postgis/postgis:12-3.0"),
+		testcontainers.WithImage("docker.io/postgis/postgis:16-3.4"),
 		postgres.WithDatabase(database),
 		postgres.WithUsername(user),
 		postgres.WithPassword(password),
