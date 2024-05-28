@@ -139,6 +139,10 @@ func (p *binaryScanPlan) Scan(src []byte, target any) error {
 	if !ok {
 		return errors.ErrUnsupported
 	}
+	if len(src) == 0 {
+		*pgeom = nil
+		return nil
+	}
 	geom, err := p.geosContext.NewGeomFromWKB(src)
 	if err != nil {
 		return err
@@ -153,6 +157,10 @@ func (p *textScanPlan) Scan(src []byte, target any) error {
 	pgeom, ok := target.(**geos.Geom)
 	if !ok {
 		return errors.ErrUnsupported
+	}
+	if len(src) == 0 {
+		*pgeom = nil
+		return nil
 	}
 	var err error
 	src, err = hex.DecodeString(string(src))

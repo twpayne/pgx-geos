@@ -56,6 +56,32 @@ func TestCodecDecodeValue(t *testing.T) {
 func TestCodecDecodeNullValue(t *testing.T) {
 	defaultConnTestRunner.RunTest(context.Background(), t, func(ctx context.Context, tb testing.TB, conn *pgx.Conn) {
 		tb.Helper()
+
+		type s struct {
+			Geom *geos.Geom `db:"geom"`
+		}
+
+		for _, format := range []int16{
+			pgx.BinaryFormatCode,
+			pgx.TextFormatCode,
+		} {
+			tb.(*testing.T).Run(strconv.Itoa(int(format)), func(t *testing.T) {
+				tb.Helper()
+
+				rows, err := conn.Query(ctx, "select NULL::geometry AS geom", pgx.QueryResultFormats{format})
+				assert.NoError(tb, err)
+
+				value, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[s])
+				assert.NoError(t, err)
+				assert.Zero(t, value)
+			})
+		}
+	})
+}
+
+func TestCodecDecodeNullGeometry(t *testing.T) {
+	defaultConnTestRunner.RunTest(context.Background(), t, func(ctx context.Context, tb testing.TB, conn *pgx.Conn) {
+		tb.Helper()
 		rows, err := conn.Query(ctx, "select $1::geometry", nil)
 		assert.NoError(tb, err)
 
