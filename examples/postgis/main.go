@@ -82,9 +82,6 @@ func populateDB(ctx context.Context, conn *pgx.Conn) error {
 		return err
 	}
 	defer tx.Rollback(ctx)
-	if err != nil {
-		return err
-	}
 	for _, waypoint := range []Waypoint{
 		{
 			Name:     "London",
