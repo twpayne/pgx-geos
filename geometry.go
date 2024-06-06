@@ -80,11 +80,11 @@ func (c *geometryCodec) PlanScan(m *pgtype.Map, old uint32, format int16, target
 	}
 	switch format {
 	case pgx.BinaryFormatCode:
-		return &geometryBinaryScanPlan{
+		return geometryBinaryScanPlan{
 			geosContext: c.geosContext,
 		}
 	case pgx.TextFormatCode:
-		return &geometryTextScanPlan{
+		return geometryTextScanPlan{
 			geosContext: c.geosContext,
 		}
 	default:
@@ -136,7 +136,7 @@ func (p geometryTextEncodePlan) Encode(value any, buf []byte) (newBuf []byte, er
 }
 
 // Scan implements [github.com/jackc/pgx/v5/pgtype.ScanPlan.Scan].
-func (p *geometryBinaryScanPlan) Scan(src []byte, target any) error {
+func (p geometryBinaryScanPlan) Scan(src []byte, target any) error {
 	pgeom, ok := target.(**geos.Geom)
 	if !ok {
 		return errors.ErrUnsupported
@@ -155,7 +155,7 @@ func (p *geometryBinaryScanPlan) Scan(src []byte, target any) error {
 }
 
 // Scan implements [github.com/jackc/pgx/v5/pgtype.ScanPlan.Scan].
-func (p *geometryTextScanPlan) Scan(src []byte, target any) error {
+func (p geometryTextScanPlan) Scan(src []byte, target any) error {
 	pgeom, ok := target.(**geos.Geom)
 	if !ok {
 		return errors.ErrUnsupported
