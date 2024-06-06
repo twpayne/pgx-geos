@@ -9,6 +9,9 @@ import (
 
 // Register registers codecs for [github.com/twpayne/go-geos] types on conn.
 func Register(ctx context.Context, conn *pgx.Conn, geosContext *geos.Context) error {
+	if err := registerBox2D(ctx, conn); err != nil {
+		return err
+	}
 	if err := registerGeom(ctx, conn, geosContext); err != nil {
 		return err
 	}
