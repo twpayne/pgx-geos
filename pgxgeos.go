@@ -12,6 +12,7 @@ import (
 func Register(ctx context.Context, conn *pgx.Conn, geosContext *geos.Context) error {
 	return errors.Join(
 		registerBox2D(ctx, conn),
+		registerBox3D(ctx, conn),
 		registerGeom(ctx, conn, geosContext),
 	)
 }
