@@ -181,7 +181,7 @@ func (p geometryTextScanPlan) Scan(src []byte, target any) error {
 // registerGeom registers codecs for [*github.com/twpayne/go-geos.Geom] types on conn.
 func registerGeom(ctx context.Context, conn *pgx.Conn, geosContext *geos.Context) error {
 	var geographyOID, geometryOID uint32
-	err := conn.QueryRow(ctx, "select 'geography'::text::regtype::oid, 'geometry'::text::regtype::oid").Scan(&geometryOID, &geographyOID)
+	err := conn.QueryRow(ctx, "select 'geography'::text::regtype::oid, 'geometry'::text::regtype::oid").Scan(&geographyOID, &geometryOID)
 	if err != nil {
 		return err
 	}
