@@ -14,6 +14,7 @@ import (
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/wait"
 	"github.com/twpayne/go-geos"
+
 	pgxgeos "github.com/twpayne/pgx-geos"
 )
 

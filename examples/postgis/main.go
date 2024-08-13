@@ -10,6 +10,8 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/twpayne/go-geos"
+
+	pgxgeos "github.com/twpayne/pgx-geos"
 )
 
 var (
@@ -146,6 +148,9 @@ func run() error {
 		return err
 	}
 	defer conn.Close(ctx)
+	if err := pgxgeos.Register(ctx, conn, geos.NewContext()); err != nil {
+		return err
+	}
 	if err := conn.Ping(ctx); err != nil {
 		return err
 	}
