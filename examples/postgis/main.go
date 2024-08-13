@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	pgxgeos "github.com/twpayne/pgx-geos"
 	"io"
 	"os"
 
@@ -59,6 +60,11 @@ func (w *Waypoint) UnmarshalJSON(data []byte) error {
 	w.Name = geoJSONWaypoint.Properties["name"].(string)
 	w.Geometry = geom
 	return nil
+}
+
+// registerGeos registers required codecs
+func registerGeos(ctx context.Context, conn *pgx.Conn) error {
+	return pgxgeos.Register(ctx, conn, geos.NewContext())
 }
 
 // createDB demonstrates create a PostgreSQL/PostGIS database with a table with
@@ -165,6 +171,9 @@ func run() error {
 		}
 	}
 	if *write {
+		if err := registerGeos(ctx, conn); err != nil {
+			return err
+		}
 		if err := writeGeoJSON(ctx, conn, os.Stdout); err != nil {
 			return err
 		}

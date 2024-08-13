@@ -13,8 +13,6 @@ import (
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/wait"
-	"github.com/twpayne/go-geos"
-	pgxgeos "github.com/twpayne/pgx-geos"
 )
 
 func TestIntegration(t *testing.T) {
@@ -54,7 +52,7 @@ func TestIntegration(t *testing.T) {
 
 	conn, err := pgx.Connect(ctx, connStr)
 	assert.NoError(t, err)
-	assert.NoError(t, pgxgeos.Register(ctx, conn, geos.NewContext()))
+	assert.NoError(t, registerGeos(ctx, conn))
 
 	assert.NoError(t, createDB(ctx, conn))
 
