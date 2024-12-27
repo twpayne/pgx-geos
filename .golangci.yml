@@ -1,9 +1,13 @@
+run:
+  go: '1.22'
+
 linters:
   enable:
   - asasalint
   - asciicheck
   - bidichk
   - bodyclose
+  - canonicalheader
   - containedctx
   - contextcheck
   - copyloopvar
@@ -42,6 +46,7 @@ linters:
   - gosmopolitan
   - govet
   - grouper
+  - iface
   - importas
   - inamedparam
   - ineffassign
@@ -66,6 +71,7 @@ linters:
   - promlinter
   - protogetter
   - reassign
+  - recvcheck
   - revive
   - rowserrcheck
   - sloglint
@@ -96,9 +102,9 @@ linters:
   - gochecknoglobals
   - gochecknoinits
   - godox
-  - gomnd
   - lll
   - maintidx
+  - mnd
   - nlreturn
   - nonamedreturns
   - paralleltest
