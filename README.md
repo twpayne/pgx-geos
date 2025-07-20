@@ -60,6 +60,10 @@ import (
     }
 ```
 
+## sqlc
+
+See [the sqlc documentation](https://docs.sqlc.dev/en/latest/reference/datatypes.html#using-github-com-twpayne-go-geos-pgx-v5-only).
+
 ## License
 
 MIT
