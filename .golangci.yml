@@ -1,157 +1,170 @@
+version: "2"
 run:
-  go: '1.22'
-
+  go: "1.22"
 linters:
   enable:
-  - asasalint
-  - asciicheck
-  - bidichk
-  - bodyclose
-  - canonicalheader
-  - containedctx
-  - contextcheck
-  - copyloopvar
-  - decorder
-  - dogsled
-  - dupl
-  - dupword
-  - durationcheck
-  - err113
-  - errcheck
-  - errchkjson
-  - errname
-  - errorlint
-  - exhaustive
-  - fatcontext
-  - forbidigo
-  - forcetypeassert
-  - gci
-  - ginkgolinter
-  - gocheckcompilerdirectives
-  - gochecksumtype
-  - gocognit
-  - goconst
-  - gocritic
-  - gocyclo
-  - godot
-  - gofmt
-  - gofumpt
-  - goheader
-  - goimports
-  - gomoddirectives
-  - gomodguard
-  - goprintffuncname
-  - gosec
-  - gosimple
-  - gosmopolitan
-  - govet
-  - grouper
-  - iface
-  - importas
-  - inamedparam
-  - ineffassign
-  - interfacebloat
-  - intrange
-  - ireturn
-  - loggercheck
-  - makezero
-  - mirror
-  - misspell
-  - musttag
-  - nakedret
-  - nestif
-  - nilerr
-  - nilnil
-  - noctx
-  - nolintlint
-  - nosprintfhostport
-  - perfsprint
-  - prealloc
-  - predeclared
-  - promlinter
-  - protogetter
-  - reassign
-  - recvcheck
-  - revive
-  - rowserrcheck
-  - sloglint
-  - spancheck
-  - sqlclosecheck
-  - staticcheck
-  - stylecheck
-  - tagalign
-  - tagliatelle
-  - tenv
-  - testifylint
-  - testpackage
-  - thelper
-  - tparallel
-  - typecheck
-  - unconvert
-  - unparam
-  - unused
-  - usestdlibvars
-  - wastedassign
-  - whitespace
-  - zerologlint
-  disable:
-  - cyclop
-  - depguard
-  - exhaustruct
-  - funlen
-  - gochecknoglobals
-  - gochecknoinits
-  - godox
-  - lll
-  - maintidx
-  - mnd
-  - nlreturn
-  - nonamedreturns
-  - paralleltest
-  - testableexamples
-  - varnamelen
-  - wrapcheck
-  - wsl
-
-linters-settings:
-  gci:
-    sections:
-    - standard
-    - default
-    - prefix(github.com/twpayne/pgx-geos)
-  gofumpt:
-    extra-rules: true
-    local-prefixes: github.com/twpayne/pgx-geos
-  goimports:
-    local-prefixes: github.com/twpayne/pgx-geos
-  govet:
-    disable:
-    - fieldalignment
-    - shadow
-    enable-all: true
-  ireturn:
-    allow:
-    - empty
-    - error
-    - github.com/jackc/pgx/v5/pgtype.EncodePlan
-    - github.com/jackc/pgx/v5/pgtype.ScanPlan
-    - stdlib
-  misspell:
-    locale: US
-  stylecheck:
-    checks:
-    - all
-
-issues:
-  exclude-rules:
-  - linters:
+    - asasalint
+    - asciicheck
+    - bidichk
+    - bodyclose
+    - canonicalheader
+    - containedctx
+    - contextcheck
+    - copyloopvar
+    - decorder
+    - dogsled
     - dupl
-    - forcetypeassert
-    - scopelint
-    path: "_test\\.go"
-  - linters:
+    - dupword
+    - durationcheck
+    - embeddedstructfieldcheck
     - err113
-    text: do not define dynamic errors, use wrapped static errors instead
-  - linters:
+    - errchkjson
+    - errname
+    - errorlint
+    - exhaustive
+    - exptostd
+    - fatcontext
+    - forbidigo
+    - forcetypeassert
+    - funcorder
+    - ginkgolinter
+    - gocheckcompilerdirectives
+    - gochecksumtype
+    - gocognit
+    - goconst
+    - gocritic
+    - gocyclo
+    - godot
+    - goheader
+    - gomoddirectives
+    - gomodguard
+    - goprintffuncname
+    - gosec
+    - gosmopolitan
+    - grouper
+    - iface
+    - importas
+    - inamedparam
+    - interfacebloat
+    - intrange
+    - loggercheck
+    - makezero
+    - mirror
+    - misspell
+    - musttag
+    - nakedret
+    - nestif
+    - nilerr
+    - nilnesserr
+    - nilnil
+    - noctx
+    - nolintlint
+    - nosprintfhostport
+    - perfsprint
+    - prealloc
+    - predeclared
+    - promlinter
+    - protogetter
+    - reassign
+    - recvcheck
     - revive
-    text: unused-parameter
+    - rowserrcheck
+    - sloglint
+    - spancheck
+    - sqlclosecheck
+    - staticcheck
+    - tagalign
+    - tagliatelle
+    - testableexamples
+    - testifylint
+    - testpackage
+    - thelper
+    - tparallel
+    - unconvert
+    - unparam
+    - usestdlibvars
+    - usetesting
+    - wastedassign
+    - whitespace
+  disable:
+    - arangolint
+    - cyclop
+    - depguard
+    - exhaustruct
+    - funlen
+    - gochecknoglobals
+    - gochecknoinits
+    - godox
+    - ireturn
+    - lll
+    - maintidx
+    - nlreturn
+    - noinlineerr
+    - nonamedreturns
+    - paralleltest
+    - varnamelen
+    - wrapcheck
+    - wsl
+    - wsl_v5
+    - zerologlint
+  settings:
+    govet:
+      disable:
+        - fieldalignment
+        - shadow
+      enable-all: true
+    misspell:
+      locale: US
+    revive:
+      rules:
+        - name: unused-parameter
+          disabled: true
+    staticcheck:
+      checks:
+        - all
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - linters:
+          - dupl
+          - scopelint
+        path: _test\.go
+      - linters:
+          - forbidigo
+          - gosec
+        path: internal/
+      - linters:
+          - err113
+        text: do not define dynamic errors, use wrapped static errors instead
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gci
+    - gofmt
+    - gofumpt
+    - goimports
+  settings:
+    gci:
+      sections:
+        - standard
+        - default
+        - prefix(github.com/twpayne/pgx-geos)
+    gofumpt:
+      extra-rules: true
+    goimports:
+      local-prefixes:
+        - github.com/twpayne/pgx-geos
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

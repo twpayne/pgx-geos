@@ -49,7 +49,7 @@ func TestBox2DCodecScan(t *testing.T) {
 		values, err := rows.Values()
 		assert.NoError(t, err)
 		assert.Equal(t, 1, len(values))
-		assert.Equal(t, *original, *values[0].(*geos.Box2D))
+		assert.Equal(t, *original, *values[0].(*geos.Box2D)) //nolint:forcetypeassert
 
 		assert.False(t, rows.Next())
 		assert.NoError(t, rows.Err())

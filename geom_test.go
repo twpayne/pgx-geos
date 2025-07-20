@@ -21,7 +21,7 @@ func TestGeometryCodecNull(t *testing.T) {
 					pgx.BinaryFormatCode,
 					pgx.TextFormatCode,
 				} {
-					tb.(*testing.T).Run(strconv.Itoa(int(format)), func(t *testing.T) {
+					tb.(*testing.T).Run(strconv.Itoa(int(format)), func(t *testing.T) { //nolint:forcetypeassert
 						var actual *geos.Geom
 						assert.NoError(t, conn.QueryRow(ctx, "select NULL::"+geomType, pgx.QueryResultFormats{format}).Scan(&actual))
 						assert.Zero(t, actual)
@@ -41,7 +41,7 @@ func TestGeometryCodecPointer(t *testing.T) {
 					pgx.BinaryFormatCode,
 					pgx.TextFormatCode,
 				} {
-					tb.(*testing.T).Run(strconv.Itoa(int(format)), func(t *testing.T) {
+					tb.(*testing.T).Run(strconv.Itoa(int(format)), func(t *testing.T) { //nolint:forcetypeassert
 						geom := mustNewGeomFromWKT(t, "POINT(1 2)").SetSRID(4326)
 						var actual *geos.Geom
 						assert.NoError(t, conn.QueryRow(ctx, "select $1::"+geomType, pgx.QueryResultFormats{format}, geom).Scan(&actual))
@@ -62,7 +62,7 @@ func TestGeometryCodecEncode(t *testing.T) {
 					pgx.BinaryFormatCode,
 					pgx.TextFormatCode,
 				} {
-					tb.(*testing.T).Run(strconv.Itoa(int(format)), func(t *testing.T) {
+					tb.(*testing.T).Run(strconv.Itoa(int(format)), func(t *testing.T) { //nolint:forcetypeassert
 						geom := mustNewGeomFromWKT(t, "POINT(1 2)").SetSRID(4326)
 						var actual *geos.Geom
 						assert.NoError(t, conn.QueryRow(ctx, "select $1::"+geomType, pgx.QueryResultFormats{format}, geom).Scan(&actual))
@@ -83,7 +83,7 @@ func TestGeometryCodecEncodeNull(t *testing.T) {
 					pgx.BinaryFormatCode,
 					pgx.TextFormatCode,
 				} {
-					tb.(*testing.T).Run(strconv.Itoa(int(format)), func(t *testing.T) {
+					tb.(*testing.T).Run(strconv.Itoa(int(format)), func(t *testing.T) { //nolint:forcetypeassert
 						var nullGeom, actual *geos.Geom
 						assert.NoError(t, conn.QueryRow(ctx, "select $1::"+geomType, pgx.QueryResultFormats{format}, nullGeom).Scan(&actual))
 						assert.Zero(t, actual)
@@ -103,7 +103,7 @@ func TestGeometryCodecScan(t *testing.T) {
 					pgx.BinaryFormatCode,
 					pgx.TextFormatCode,
 				} {
-					tb.(*testing.T).Run(strconv.Itoa(int(format)), func(t *testing.T) {
+					tb.(*testing.T).Run(strconv.Itoa(int(format)), func(t *testing.T) { //nolint:forcetypeassert
 						original := mustNewGeomFromWKT(t, "POINT(1 2)").SetSRID(4326)
 						rows, err := conn.Query(ctx, "select $1::"+geomType, pgx.QueryResultFormats{format}, original)
 						assert.NoError(t, err)
@@ -112,7 +112,7 @@ func TestGeometryCodecScan(t *testing.T) {
 						values, err := rows.Values()
 						assert.NoError(t, err)
 						assert.Equal(t, 1, len(values))
-						assert.Equal(t, original.ToEWKBWithSRID(), values[0].(*geos.Geom).ToEWKBWithSRID())
+						assert.Equal(t, original.ToEWKBWithSRID(), values[0].(*geos.Geom).ToEWKBWithSRID()) //nolint:forcetypeassert
 
 						assert.False(t, rows.Next())
 						assert.NoError(t, rows.Err())
@@ -132,7 +132,7 @@ func TestGeometryCodecValue(t *testing.T) {
 					pgx.BinaryFormatCode,
 					pgx.TextFormatCode,
 				} {
-					tb.(*testing.T).Run(strconv.Itoa(int(format)), func(t *testing.T) {
+					tb.(*testing.T).Run(strconv.Itoa(int(format)), func(t *testing.T) { //nolint:forcetypeassert
 						var actual *geos.Geom
 						assert.NoError(t, conn.QueryRow(ctx, "select ST_SetSRID('POINT(3 4)'::"+geomType+", 4326)", pgx.QueryResultFormats{format}).Scan(&actual))
 						expected := mustNewGeomFromWKT(t, "POINT(3 4)").SetSRID(4326)
