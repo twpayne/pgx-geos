@@ -149,7 +149,6 @@ func (p geometryBinaryScanPlan) Scan(src []byte, target any) error {
 	if err != nil {
 		return err
 	}
-	(*pgeom).Destroy()
 	*pgeom = geom
 	return nil
 }
@@ -173,7 +172,6 @@ func (p geometryTextScanPlan) Scan(src []byte, target any) error {
 	if err != nil {
 		return err
 	}
-	(*pgeom).Destroy()
 	*pgeom = geom
 	return nil
 }

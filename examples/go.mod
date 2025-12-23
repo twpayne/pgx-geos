@@ -1,15 +1,15 @@
 module github.com/twpayne/pgx-geos/examples
 
-go 1.23.4
+go 1.24.0
 
 replace github.com/twpayne/pgx-geos => ..
 
 require (
 	github.com/alecthomas/assert/v2 v2.11.0
-	github.com/jackc/pgx/v5 v5.7.2
+	github.com/jackc/pgx/v5 v5.7.6
 	github.com/testcontainers/testcontainers-go v0.35.0
 	github.com/testcontainers/testcontainers-go/modules/postgres v0.35.0
-	github.com/twpayne/go-geos v0.20.0
+	github.com/twpayne/go-geos v0.20.2
 	github.com/twpayne/pgx-geos v0.0.0-00010101000000-000000000000
 )
 
@@ -66,9 +66,9 @@ require (
 	go.opentelemetry.io/otel/metric v1.37.0 // indirect
 	go.opentelemetry.io/otel/sdk v1.37.0 // indirect
 	go.opentelemetry.io/otel/trace v1.37.0 // indirect
-	golang.org/x/crypto v0.36.0 // indirect
-	golang.org/x/sys v0.33.0 // indirect
-	golang.org/x/text v0.26.0 // indirect
+	golang.org/x/crypto v0.46.0 // indirect
+	golang.org/x/sys v0.39.0 // indirect
+	golang.org/x/text v0.32.0 // indirect
 	golang.org/x/time v0.12.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
