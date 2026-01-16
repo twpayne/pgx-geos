@@ -21,8 +21,8 @@ import (
 func TestIntegration(t *testing.T) {
 	ctx := context.Background()
 
-	if _, err := exec.LookPath("docker"); err != nil {
-		t.Skip("docker not found in $PATH")
+	if cmd := exec.Command("docker", "info"); cmd.Run() == nil {
+		t.Skip("docker daemon is not running")
 	}
 
 	var (
@@ -31,8 +31,8 @@ func TestIntegration(t *testing.T) {
 		password = "pgxgeospassword"
 	)
 
-	pgContainer, err := postgres.RunContainer(ctx,
-		testcontainers.WithImage("docker.io/postgis/postgis:16-3.4"),
+	pgContainer, err := postgres.Run(ctx,
+		"docker.io/postgis/postgis:16-3.4",
 		postgres.WithDatabase(database),
 		postgres.WithUsername(user),
 		postgres.WithPassword(password),
