@@ -21,8 +21,8 @@ import (
 func TestIntegration(t *testing.T) {
 	ctx := context.Background()
 
-	if cmd := exec.Command("docker", "info"); cmd.Run() == nil {
-		t.Skip("docker daemon is not running")
+	if cmd := exec.Command("docker", "info"); cmd.Run() != nil {
+		t.Skip("docker daemon is not available or not running")
 	}
 
 	var (
