@@ -6,13 +6,10 @@ import (
 	"os/exec"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/alecthomas/assert/v2"
 	"github.com/jackc/pgx/v5"
-	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
-	"github.com/testcontainers/testcontainers-go/wait"
 	"github.com/twpayne/go-geos"
 
 	pgxgeos "github.com/twpayne/pgx-geos"
@@ -36,11 +33,7 @@ func TestIntegration(t *testing.T) {
 		postgres.WithDatabase(database),
 		postgres.WithUsername(user),
 		postgres.WithPassword(password),
-		testcontainers.WithWaitStrategy(
-			wait.ForLog("database system is ready to accept connections").
-				WithOccurrence(2).
-				WithStartupTimeout(5*time.Second),
-		),
+		postgres.BasicWaitStrategies(),
 	)
 	if err != nil {
 		t.Fatal(err)
